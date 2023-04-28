@@ -1,9 +1,4 @@
-% this part below must be copied to your m file and complete the %
-%required
-%clear
-%clc
-
-%% reconstruction from oversampling
+%% construction from oversampling
 t=0:0.001:1;% time signal
 fs=1000; % 1/0.001
 y=2*cos(2*pi*5*t);
@@ -74,7 +69,7 @@ title('magnitude of minimum sampled signals')
 %% construction from undersampling sampling
 
 t=0:0.2:1;
-fs=5; %1/0.2
+fs = 5; %1/0.2
 y=2*cos(2*pi*5*t);
 [B,A] = butter(10,5/25,'low' );
 zero_added_signal=zeros(1,length(y)*10);
@@ -104,7 +99,7 @@ title('magnitude of undersampled signals')
 
 %% quantization using pi function
 % Parameters
-A = 4;      % Amplitude
+A = 1;      % Amplitude
 f = 2;      % Frequency
 Fs = 4000;  % Sampling frequency
 
@@ -112,30 +107,35 @@ Fs = 4000;  % Sampling frequency
 t = 0:1/Fs:1;           % Time vector
 x = A*sin(2*pi*f*t);    % Sinusoidal wave
 
-% Quantize the sampled signal
-n = 3;                  % Number of bits for integer or fraction parts
-m = 2*n + 1;            % Number of bits for the whole word, including the sign bit
-xq = fi(x, 1, m, n);    % Quantize the signal using fixed-point arithmetic
-xq = double(xq);        % Convert back to double for further processing
-
-% Convert to binary 
-% there is a problem in converting to binary
-xb = dec2bin(xq, m);   % Convert quantized samples to binary
+% Plotting the original sine wave to compare it to the quantized signal
+figure;
+plot(t,x);
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Original Sine Wave');
 
 % Calculate mean square quantization error for n = 3, 4, 5, 10
 n_vec = [3 4 5 10];
 MSE = zeros(size(n_vec));
+
+figure;
 for i = 1:length(n_vec)
-    n = n_vec(i);
-    m = 2*n + 1;
+    n = n_vec(i);               % Number of bits for integer or fraction parts
+    m = 2*n + 1;                % Number of bits for the whole word, including the sign bit
     xq = fi(x, 1, m, n);        % Quantize the signal using fixed-point arithmetic
     xq = double(xq);            % Convert back to double for further processing
-    xb = dec2bin(xq, m);
+    xb = dec2bin(xq, m);         % Quantize the signal using fixed-point arithmetic
     e = x - xq;                 % Calculate quantization error
     MSE(i) = mean(e.^2);        % Calculate mean square quantization error
+    
+    % Create a figure with 4 columns and 2 rows of subplots
+    subplot(4,1,i);
+    plot(t,xq);
+    % Add a main title to the figure
+    title('Quantized signal using fi function for n = ', num2str(n) );
 end
-figure
 
+figure
 stem(n_vec,MSE)
 title("quantization using pi function")
 xlabel("number of bits n")
@@ -144,7 +144,7 @@ ylabel("MSE")
 
 %% quantization using quantize function
 % Parameters
-A = 4;      % Amplitude
+A = 1;      % Amplitude
 f = 2;      % Frequency
 Fs = 4000;  % Sampling frequency
 
@@ -152,28 +152,32 @@ Fs = 4000;  % Sampling frequency
 t = 0:1/Fs:1;           % Time vector
 x = A*sin(2*pi*f*t);    % Sinusoidal wave
 
-% Define quantizer object
-n = 3;                  % Number of bits of fraction 
-q = quantizer([m n]); % Create quantizer object
-
-% Quantize the sampled signal
-xq = quantize(q, x);    % Quantize the signal
-
-% Convert to binary
-m = 2*n + 1;              % word size
-xb = dec2bin(xq, m);   % Convert quantized samples to binary
+% Plotting the original sine wave to compare it to the quantized signal
+figure;
+plot(t,x);
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Original Sine Wave');
 
 % Calculate mean square quantization error for n = 3, 4, 5, 10
 n_vec = [3 4 5 10];
 MSE = zeros(size(n_vec));
+
+figure;
 for i = 1:length(n_vec)
     n = n_vec(i);
-    m = 2*n + 1;
-    q = quantizer([m n]);
-    xq = quantize(q, x);    
-    xb = dec2bin(xq, m);
+    m = 2*n + 1;                % word size
+    q = quantizer([m n]);       % Create quantizer object
+    xq = quantize(q, x);        % Quantize the signal
+    xb = dec2bin(xq, m);        % Convert quantized samples to binary
     e = x - double(xq);         % Calculate quantization error
     MSE(i) = mean(e.^2);        % Calculate mean square quantization error
+    
+    % Create a figure with 4 columns and 2 rows of subplots
+    subplot(4,1,i);
+    plot(t,xq);
+    % Add a main title to the figure
+    title('Quantized signal using fi function for n = ', num2str(n) );
 end
 figure
 stem(n_vec, MSE)  % Plot mean square quantization error
@@ -186,7 +190,7 @@ ylabel('Mean square quantization error')
 %% non uniform quantization using compand
 
 % Parameters
-A = 4;      % Amplitude
+A = 1;      % Amplitude
 f = 2;      % Frequency
 Fs = 4000;  % Sampling frequency
 
@@ -194,31 +198,37 @@ Fs = 4000;  % Sampling frequency
 t = 0:1/Fs:1;           % Time vector
 x = A*sin(2*pi*f*t);    % Sinusoidal wave
 
-% Define quantizer object
-n = 3;                  % Number of bits of fraction 
-q = quantizer([m n]); % Create quantizer object
+% Plotting the original sine wave to compare it to the quantized signal
+figure;
+plot(t,x);
+xlabel('Time (s)');
+ylabel('Amplitude (V)');
+title('Original Sine Wave');
 
 % Perform non-uniform quantization using compand
-mu = 255;                   % Companding law parameter
-xq = compand(x, mu, max(abs(x)), 'mu/compressor');  % Compress signal using companding law
-xq = quantize(q, xq);    % Quantize the compressed signal
-
-% Convert to binary
-m = 2*n + 1;              % word size
-xb = dec2bin(xq, m);   % Convert quantized samples to binary
+mu = 255;                                      % Companding law parameter
+x_compand = compand(x, mu, max(x), 'mu/compressor');  % Compress signal using companding law
 
 % Calculate mean square quantization error for n = 3, 4, 5, 10
 n_vec = [3 4 5 10];
 MSE = zeros(size(n_vec));
+
+figure;
 for i = 1:length(n_vec)
     n = n_vec(i);
     m = 2*n + 1;
     q = quantizer([m n]);
-    xq = compand(x, mu, max(abs(x)), 'mu/compressor');  % Compress signal using companding law
-    xq = quantize(q, xq);       % Quantize the compressed signal
-    xb = dec2bin(xq, m);
-    e = x - double(xq);         % Calculate quantization error
-    MSE(i) = mean(e.^2);        % Calculate mean square quantization error
+    xq = quantize(q, x_compand);                           % Quantize the compressed signal
+    x_expand = compand(xq, mu, max(xq),'mu/expander');           % Expand the quantized signal
+    xb = dec2bin(double(x_expand), m);    % Convert the quantized samples to binary        
+    e = x - double(x_expand);             % Calculate quantization error
+    MSE(i) = mean(e.^2);            % Calculate mean square quantization error
+    
+    % Create a figure with 4 columns and 2 rows of subplots
+    subplot(4,1,i);
+    plot(t,xq);
+    % Add a main title to the figure
+    title('Quantized signal using fi function for n = ', num2str(n) );
 end
 
 figure
