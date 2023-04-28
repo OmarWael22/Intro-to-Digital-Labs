@@ -14,8 +14,8 @@ This lab includes code to construct oversampling, minimum and under-sampling, an
 
 ## Contributors
 
-- Omar Hany
-- Omar Wael
+- [Omar Hany](https://github.com/es-OmarHani)
+- [Omar Wael](https://github.com/OmarWael22)
 - Amr Maghraby
 
 ## License
