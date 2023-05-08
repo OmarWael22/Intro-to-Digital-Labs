@@ -31,12 +31,14 @@ for snr_idx = 1:length(snr_range)
     if receiver_type == "matched"
         filter = ones(1,num_samples);    % matched filter
         output_samples = conv(noisy_waveform,filter,'same');
-        sampled_output = output_samples(1:sampling_instant:end);
+%         sampled_output = output_samples(1:sampling_instant:end);
+        sampled_output = output_samples(num_samples/2:num_samples:end);
         
     elseif receiver_type == "correlator"
-        filter = ones(1,num_samples);    % correlator
+        filter = ones(1,length(noisy_waveform));    % correlator
         output_samples = filter.*noisy_waveform;
         sampled_output = sum(reshape(output_samples,num_samples,[]));
+        
     else
         error("Invalid receiver type");
     end
