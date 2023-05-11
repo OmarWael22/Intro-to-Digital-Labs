@@ -1,19 +1,22 @@
-clc ; clear all ; close all;
+clc ; clear ; close all;
 
 % Simulation Parameters
 num_bits = 1e5;             % number of bits
 snr_range = 0:2:30;         % SNR range in dB
 num_samples = 20;           % samples per waveform
 sampling_instant = 20;      % sampling instant
-receiver_type = "matched";  % receiver type: matched filter or correlator
+receiver_type = "correlator";  % receiver type: matched filter or correlator
 s1_amp = 1;                 % amplitude of rectangular signal s1(t)
 s2_amp = 0;                 % amplitude of zero signal s2(t)
+ s1_waveform=ones(1,20);
+ s2_waveform=zeros(1,20);
 
 % Generate random binary data
 bits = randi([0 1],1,num_bits);  
 
 % Represent each bit with waveform
-waveform = reshape(repmat(bits,20,1),1,[]);
+ waveform = reshape(repmat(bits,20,1),1,[]);
+
 
 % Apply noise to waveform
 for snr_idx = 1:length(snr_range)
@@ -28,24 +31,30 @@ for snr_idx = 1:length(snr_range)
     noisy_waveform = awgn(waveform,snr,'measured','linear');  
     
     % Apply convolution process in receiver
+   
+    
     if receiver_type == "matched"
-        filter = ones(1,num_samples);    % matched filter
-        output_samples = conv(noisy_waveform,filter,'same');
-%         sampled_output = output_samples(1:sampling_instant:end);
-        sampled_output = output_samples(num_samples/2:num_samples:end);
+           % matched filter
+            filter=flip(s1_waveform-s2_waveform);
+           detected_bits=bits;
+           for i=0:length(bits)-1
+               frame=( noisy_waveform(i*20+1:(i+1)*20) );
+            output_samples = conv(frame,filter);
+            detected_bits(i+1) = output_samples(round((length(frame)+length(filter)-1)/2 ));
+           end
         
     elseif receiver_type == "correlator"
         filter = ones(1,length(noisy_waveform));    % correlator
         output_samples = filter.*noisy_waveform;
-        sampled_output = sum(reshape(output_samples,num_samples,[]));
+        detected_bits = sum(reshape(output_samples,num_samples,[]));
         
     else
         error("Invalid receiver type");
     end
     
     % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
-    threshold = 0.5*(max(sampled_output) + min(sampled_output));
-    detected_bits = sampled_output > threshold;
+    threshold = mean(detected_bits);
+    detected_bits = detected_bits > threshold;
     
     % Calculate bit error rate (BER)
     num_errors = nnz(xor(bits,detected_bits));
