@@ -9,9 +9,47 @@ t = 0:Ts:T-Ts;   % time vector
 % Generate random bits
 bits = randi([0 1],1, nBits);
 
+% Define pulse shape
+pulse_width = 10;  % Width of square pulse in samples
+pulse_shape = ones(1, pulse_width);  % Square pulse
+
 % Modulate using different line codes
 nrtz = bits.*2-1;                         % non-return to zero
-nrzi = 1-2*bits;                          % non-return to zero inverted
+
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_nrtz = zeros(1, length(nrtz*pulse_width));
+for i = 1:length(nrtz)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_nrtz(start_idx:end_idx) = nrtz(i) * pulse_shape;
+end
+
+% Modulate using NRTZ inverted line code
+nrzi = zeros(1, length(bits)*2);
+% Set initial signal level to positive
+signal_level = -1;
+
+% Loop through binary data and encode using NRZI
+j = 1; % Index variable for the AMI output vector
+for i = 1:length(bits)
+    if bits(i) == 0
+        % No transition, keep same signal level
+        nrzi(j:j+1) = signal_level;
+    else
+        % Transition, invert signal level
+        signal_level = -signal_level;
+        nrzi(j:j+1) = signal_level;
+    end
+     j = j + 2; % Increment the index variable by 2 for each bit
+end
+
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_nrzi = zeros(1, length(nrzi*pulse_width));
+for i = 1:length(nrzi)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_nrzi(start_idx:end_idx) = nrzi(i) * pulse_shape;
+end
 
 % Modulate using RTZ line code
 rtz = zeros(1, length(bits)*2);
@@ -21,6 +59,14 @@ for i = 1:length(bits)
     else
         rtz(2*i-1) = 0;
     end
+end
+
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_rtz = zeros(1, length(rtz*pulse_width));
+for i = 1:length(rtz)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_rtz(start_idx:end_idx) = rtz(i) * pulse_shape;
 end
 
 % Modulate using AMI (Alternate Mark Inversion) line code
@@ -39,6 +85,14 @@ for i = 1:length(bits)
     j = j + 2; % Increment the index variable by 2 for each bit
 end
 
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_ami = zeros(1, length(ami*pulse_width));
+for i = 1:length(ami)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_ami(start_idx:end_idx) = ami(i) * pulse_shape;
+end
+
 % Modulate using Manchester line code
 MAN = zeros(1, length(bits)*2);
 for i = 1:length(bits)
@@ -49,6 +103,13 @@ for i = 1:length(bits)
     end
 end
 
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_man = zeros(1, length(MAN*pulse_width));
+for i = 1:length(MAN)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_man(start_idx:end_idx) = MAN(i) * pulse_shape;
+end
 
 % Modulate using MLT3 line code
 % define the three signal levels
@@ -76,18 +137,28 @@ for i = 1:length(bits)
     j = j + 2 ;  % Increment the index variable by 2 for each bit
 end
 
+% Apply pulse amplitude modulation (PAM) to NRZI signal
+pam_signal_mlt = zeros(1, length(mlt*pulse_width));
+for i = 1:length(mlt)
+    start_idx = (i-1)*pulse_width+1;
+    end_idx = start_idx+pulse_width-1;
+    pam_signal_mlt(start_idx:end_idx) = mlt(i) * pulse_shape;
+end
+
+
+
 %plot original binary sequence
 figure;
 stem(bits);xlim([-1 nBits+2]);ylim([-2 2]);title('Original Sequence');
 
 % Plot modulated signals
 figure;
-subplot(6,1,1); plot(nrtz); ylim([-1.5 1.5]); title('Non-return to zero');
-subplot(6,1,2); plot(nrzi); ylim([-1.5 1.5]); title('Non-return to zero inverted');
-subplot(6,1,3); plot(rtz); ylim([-1.5 1.5]); title('Return to zero');
-subplot(6,1,4); plot(ami); ylim([-1.5 1.5]); title('Alternate mark inversion');
-subplot(6,1,5); plot(MAN); ylim([-1.5 1.5]); title('Manchester coding');
-subplot(6,1,6); plot(mlt); ylim([-1.5 1.5]); title('Multi-level transmission');
+subplot(6,1,1); plot(pam_signal_nrtz); axis([0 length(pam_signal_nrtz) -1.5 1.5]); ylim([-1.5 1.5]); title('Non-return to zero');
+subplot(6,1,2); plot(pam_signal_nrzi); axis([0 length(pam_signal_nrzi) -1.5 1.5]);ylim([-1.5 1.5]); title('Non-return to zero inverted');
+subplot(6,1,3); plot(pam_signal_rtz); axis([0 length(pam_signal_rtz) -1.5 1.5]); ylim([-1.5 1.5]); title('Return to zero');
+subplot(6,1,4); plot(pam_signal_ami); axis([0 length(pam_signal_ami) -1.5 1.5]); ylim([-1.5 1.5]); title('Alternate mark inversion');
+subplot(6,1,5);plot(pam_signal_man); axis([0 length(pam_signal_man) -1.5 1.5]); ylim([-1.5 1.5]); title('Manchester coding');
+subplot(6,1,6); plot(pam_signal_mlt); axis([0 length(pam_signal_mlt) -1.5 1.5]); ylim([-1.5 1.5]); title('Multi-level transmission');
 xlabel('Time (s)');
 
 % Calculate power spectral density
