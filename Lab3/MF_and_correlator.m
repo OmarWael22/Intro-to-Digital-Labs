@@ -85,17 +85,15 @@ figure
 semilogy(snr_range,ber_MF,'-o');
 xlabel('SNR (dB)');
 ylabel('Bit Error Rate (BER)');
-title('BER vs SNR Curve for matched');
 grid on;
 hold on;
 semilogy(snr_range,ber_Corr,'-o');
-xlabel('SNR (dB)');
-ylabel('Bit Error Rate (BER)');
-title('BER vs SNR Curve');
-grid on;
+hold off;
+legend("Matched reciever","Correlator reciever");
+figure
 semilogy(snr_range,ber_simple,'-o');
 xlabel('SNR (dB)');
 ylabel('Bit Error Rate (BER)');
-title('BER vs SNR Curve');
+title('BER vs SNR Curve for simple detector');
 grid on;
-legend("Matched reciever","Correlator reciever","simple reciever");
+legend("simple reciever");
