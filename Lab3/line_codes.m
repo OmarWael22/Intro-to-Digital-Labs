@@ -125,19 +125,24 @@ for k = 1:numel(pam_signals)
     xlabel('Time (s)');
 end
 
-% Plotting PSD
-figure;
-for k = 1:numel(pam_signals)
-    
-N = length(pam_signals{k}); % number of samples
-Fs = 1/Ts; % sampling frequency
-f = linspace(-Fs/2, Fs/2, N);% frequency vector
+% Calculate power spectral density
+[P_nrtz, f_nrtz] = periodogram(nrtz,[],[],1/Ts,'centered');
+[P_nrzi, f_nrzi] = periodogram(nrzi,[],[],1/Ts,'centered');
+[P_rtz, f_rtz] = periodogram(rtz,[],[],1/Ts,'centered');
+[P_ami, f_ami] = periodogram(ami,[],[],1/Ts,'centered');
+[P_manchester, f_manchester] = periodogram(MAN,[],[],1/Ts,'centered');
+[P_mlt, f_mlt] = periodogram(mlt,[],[],1/Ts,'centered');
 
-subplot(numel(pam_signals), 1, k);
-plot(f, 10*log10(abs(fftshift(fft(pam_signals{k})) .^ 2)));
-xlim([-Fs/2, Fs/2]); grid on;
-title(sprintf('PSD for %s', upper(signals_names{k})));
+% Plot power spectral density
+figure;
+subplot(6,1,1); plot(f_nrtz,10*log10(P_nrtz)); title('Non-return to zero');
+subplot(6,1,2); plot(f_nrzi,10*log10(P_nrzi)); title('Non-return to zero inverted');
+subplot(6,1,3); plot(f_rtz,10*log10(P_rtz)); title('Return to zero');
+subplot(6,1,4); plot(f_ami,10*log10(P_ami)); title('Alternate mark inversion');
+subplot(6,1,5); plot(f_manchester,10*log10(P_manchester)); title('Manchester coding');
+subplot(6,1,6); plot(f_mlt,10*log10(P_mlt)); title('Multi-level transmission');
 xlabel('Frequency (Hz)');
+<<<<<<< HEAD
 ylabel('Power/Frequency (dB/Hz)');
 end
 
@@ -212,5 +217,8 @@ end
 % subplot(6,1,6); plot(f_mlt,10*log10(P_mlt)); title('Multi-level transmission');
 % xlabel('Frequency (Hz)');
 % ylabel('Power spectral density (dB/Hz)');
+=======
+ylabel('Power spectral density (dB/Hz)');
+>>>>>>> 55da906b5740e5ebb5b529142e507ce0fd1e300d
 
 
