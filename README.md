@@ -21,4 +21,3 @@ This lab includes code to construct oversampling, minimum and under-sampling, an
 ## License
 
 This repository is licensed under the MIT License.
-

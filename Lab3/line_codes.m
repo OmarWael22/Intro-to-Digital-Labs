@@ -8,20 +8,26 @@ t = 0:Ts:T-Ts;   % time vector
 
 % Generate random bits
 bits = randi([0 1],1, nBits);
+%plot original binary sequence
+figure;
+stem(bits);xlim([-1 nBits+2]);ylim([-2 2]);title('Original Sequence');
+grid on;
 
 % Define pulse shape
 pulse_width = 10;  % Width of square pulse in samples
 pulse_shape = ones(1, pulse_width);  % Square pulse
 
 % Modulate using different line codes
-%%%%%% non-return to zero
+%%%%%% non-return to zero (NRZ)
 nrtz = bits.*2-1;                         
 
-%%%%%%% NRTZ
+%%%%%%% NRTI
 nrzi = zeros(1, length(bits)*2);
 
 %%%%%%% RTZ
 rtz = zeros(1, length(bits)*2);
+% Set initial signal level to positive
+signal_level = -1;
 
 %%%%%%% AMI
 pulse = -1;
@@ -30,8 +36,7 @@ j = 1; % Index variable for the AMI output vector
 
 %%%%%%% MAN 
 MAN = zeros(1, length(bits)*2);
-% Set initial signal level to positive
-signal_level = -1;
+
 
 %%%%% MLT3
 % define the three signal levels
@@ -90,9 +95,7 @@ for i = 1:length(bits)
         % set the new signal level for the current bit
         mlt(j:j+1) = levels(current_level);
     end
-    
      j = j + 2; % Increment the index variable by 2 for each bit
-
 end
 
 % Signals to PAM signals To make plotting like Square waves
@@ -112,6 +115,7 @@ for k = 1:numel(signals)
 end
 
 % plotting signals
+figure;
 for k = 1:numel(pam_signals)
     subplot(numel(pam_signals), 1, k);
     plot(pam_signals{k});
