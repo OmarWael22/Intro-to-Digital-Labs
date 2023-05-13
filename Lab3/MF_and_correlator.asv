@@ -29,7 +29,6 @@ for snr_idx = 1:length(snr_range)
     
     % add noise to waveform
     noisy_waveform = awgn(waveform,snr,'measured','linear');
-    noisy_bits = awgn(bits,snr,'measured','linear');
     
     % Apply convolution process in receiver
     % matched filter
@@ -50,9 +49,8 @@ for snr_idx = 1:length(snr_range)
     ber_MF(snr_idx) = num_errors_MF/num_bits;
     
     % correlator
-    %output_samples = waveform.*noisy_waveform;
-    output_samples = bits .* noisy_bits;
-    %detected_bits = sum(reshape(output_samples,num_samples,[]));
+    output_samples = waveform.*noisy_waveform;
+    detected_bits = sum(reshape(output_samples,num_samples,[]));
     % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
     threshold = mean(detected_bits);
     threshold = 0.5;
