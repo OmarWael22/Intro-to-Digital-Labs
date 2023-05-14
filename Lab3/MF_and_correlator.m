@@ -60,7 +60,6 @@ for snr_idx = 1:length(snr_range)
     output_samples=bits.*noisy_bits;
 
     % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
-    threshold = mean(detected_bits);
     threshold=0.5;
   
     % Calculate bit error rate (BER)
