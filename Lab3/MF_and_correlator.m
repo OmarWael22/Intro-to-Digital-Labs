@@ -5,29 +5,21 @@ num_bits = 1e5;             % number of bits
 snr_range = 0:2:30;         % SNR range in dB
 num_samples = 20;           % samples per waveform
 sampling_instant = 20;      % sampling instant
+receiver_type = "matched";  % receiver type: matched filter or correlator
 s1_amp = 1;                 % amplitude of rectangular signal s1(t)
 s2_amp = 0;                 % amplitude of zero signal s2(t)
 s1_waveform=ones(1,20);
 s2_waveform=zeros(1,20);
-<<<<<<< HEAD
-=======
 
->>>>>>> 55da906b5740e5ebb5b529142e507ce0fd1e300d
 % Generate random binary data
 bits = randi([0 1],1,num_bits);
 
 % Represent each bit with waveform
 waveform = reshape(repmat(bits,20,1),1,[]);
-<<<<<<< HEAD
-%Initialize BER vector of MF, Correlator
-ber_MF = zeros(1,length(snr_range));
-ber_Corr = zeros(1,length(snr_range));
-=======
 
 ber_MF=zeros(1,length(snr_range));
 ber_Corr=zeros(1,length(snr_range));
 ber_simple=zeros(1,length(snr_range));
->>>>>>> 55da906b5740e5ebb5b529142e507ce0fd1e300d
 
     
 % Apply noise to waveform
@@ -41,17 +33,11 @@ for snr_idx = 1:length(snr_range)
     
     % add noise to waveform
     noisy_waveform = awgn(waveform,snr,'measured','linear');
-<<<<<<< HEAD
-    noisy_bits = awgn(bits,snr,'measured','linear');
-    
-    % Apply convolution process in receiver
-=======
     noisy_bits=awgn(bits,snr,'measured','linear');
     
     
     % Apply convolution process in receiver
     
->>>>>>> 55da906b5740e5ebb5b529142e507ce0fd1e300d
     % matched filter
     filter=flip(s1_waveform-s2_waveform);
     detected_bits=bits;
@@ -62,28 +48,6 @@ for snr_idx = 1:length(snr_range)
     end
     % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
     threshold = mean(detected_bits);
-<<<<<<< HEAD
-    threshold = 0.5;
-    detected_bits = detected_bits > threshold;
-    
-    % Calculate bit error rate (BER)
-    num_errors_MF = nnz(xor(bits,detected_bits));
-    ber_MF(snr_idx) = num_errors_MF/num_bits;
-    
-    % correlator
-    %output_samples = waveform.*noisy_waveform;
-    output_samples = bits .* noisy_bits;
-    %detected_bits = sum(reshape(output_samples,num_samples,[]));
-    % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
-    threshold = mean(detected_bits);
-    threshold = 0.5;
-    detected_bits = detected_bits > threshold;
-    
-    % Calculate bit error rate (BER)
-    num_errors_Corr = nnz(xor(bits,detected_bits));
-    ber_Corr(snr_idx) = num_errors_Corr/num_bits;
-    
-=======
     threshold=0.5;
     detected_bits = detected_bits > threshold;
     
@@ -93,7 +57,7 @@ for snr_idx = 1:length(snr_range)
     
     
     % correlator
-      output_samples=bits.*noisy_bits;
+    output_samples=bits.*noisy_bits;
 
     % Decide whether the Rx_sequence is ‘1’ or ‘0’ by comparing with threshold
     threshold = mean(detected_bits);
@@ -109,24 +73,24 @@ for snr_idx = 1:length(snr_range)
      % Calculate bit error rate (BER)
     num_errors_simple = nnz(xor(bits,detected_bits));
     ber_simple(snr_idx) = num_errors_simple/num_bits;
-		
-		
-   
     
-    
->>>>>>> 55da906b5740e5ebb5b529142e507ce0fd1e300d
 end
+% Calculating Transmitted power
+TR_pwr = sum(abs(waveform).^2)/length(waveform);
+% waveform: is the waveform generated for transmitted bit 
 
+fprintf('Transmitted Power = %.3f Watts\n',TR_pwr);
 % Plot BER vs SNR curve
 figure
 semilogy(snr_range,ber_MF,'-o');
 xlabel('SNR (dB)');
 ylabel('Bit Error Rate (BER)');
+title('BER vs SNR Curve for MF & Correlator');
 grid on;
 hold on;
 semilogy(snr_range,ber_Corr,'-o');
 hold off;
-legend("Matched reciever","Correlator reciever");
+legend("Matched receiver","Correlator receiver");
 figure
 semilogy(snr_range,ber_simple,'-o');
 xlabel('SNR (dB)');
